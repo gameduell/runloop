@@ -7,8 +7,8 @@
 package runloop;
 
 import cpp.vm.Thread;
-import asyncrunner.Priority;
-import asyncrunner.RunLoop;
+import runloop.Priority;
+import runloop.RunLoop;
 
 class ThreadRunLoop extends RunLoop
 {
