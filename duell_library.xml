@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<library>
+
+    <haxelib name="polygonal-ds" />
+    <haxelib name="polygonal-printf" />
+
+    <include path="backends/runloop_cpp/duell_library.xml" if="cpp" />
+    <include path="backends/runloop_notcpp/duell_library.xml" if="flash || html5" />
+
+</library>
