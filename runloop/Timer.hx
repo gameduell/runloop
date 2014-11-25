@@ -1,10 +1,10 @@
 package runloop;
 
-import msignal.Signal.Signal0;
+import msignal.Signal.Signal1;
 
 class Timer
 {
-    public var onFire(default, null): Signal0;
+    public var onFire(default, null): Signal1<Float>;
     public var paused(default, null): Bool = false;
 
     public var timeScale: Float = 1.0;
@@ -25,7 +25,7 @@ class Timer
     public function new(?ticksPerFrame = 1): Void
     {
         set_ticksPerFrame(ticksPerFrame);
-        onFire = new Signal0();
+        onFire = new Signal1();
     }
 
     private function set_ticksPerFrame(value: Int): Int
@@ -78,7 +78,7 @@ class Timer
 
             time += frameDelta;
 
-            onFire.dispatch();
+            onFire.dispatch(frameDelta);
         }
     }
 
@@ -103,7 +103,7 @@ class Timer
         }
 
         time += frameDelta;
-        onFire.dispatch();
+        onFire.dispatch(frameDelta);
     }
 
     public function stop(): Void
