@@ -29,8 +29,6 @@ class DelayPriorityQueueElement implements Prioritizable
 
 class MainRunLoop extends RunLoop
 {
-    private var timeInTheBeginningOfTheFrame : Float;
-    private var timeOnTheNextFrame : Float;
     private var firstLoopHappened : Bool;
 
     private var taskPool : Array<DelayPriorityQueueElement>;
@@ -56,22 +54,19 @@ class MainRunLoop extends RunLoop
 
     public function loopMainLoop() : Void
     {
-        timeOnTheNextFrame = Timer.stamp();
         if(!firstLoopHappened)
         {
             firstLoopHappened = true;
         }
         else
         {
-            var timeUsed = timeOnTheNextFrame - timeInTheBeginningOfTheFrame;
-            var timeLeft = (1.0 / 60.0) - timeUsed; /// 60 fps, should be a settable variable later
-
+            /// first the delays
             handleDelays();
+
+            var timeLeft = (1.0 / 60.0) - deltaOfLoop; /// 60 fps, should be a settable variable later
 
             loopOnce(timeLeft);
         }
-
-        timeInTheBeginningOfTheFrame = timeOnTheNextFrame;
     }
 
     private function handleDelays()
@@ -83,7 +78,7 @@ class MainRunLoop extends RunLoop
         queueMutex.acquire();
         #end
 
-        while(priorityQueue.size() != 0 && priorityQueue.peek().priority < timeOnTheNextFrame)
+        while(priorityQueue.size() != 0 && priorityQueue.peek().priority < timeOfLoopStart)
         {
             var prioElem = priorityQueue.dequeue();
 
@@ -105,7 +100,7 @@ class MainRunLoop extends RunLoop
 
         var prioElem = getPriorityElementFromPool();
 
-        prioElem.priority = timeOnTheNextFrame + delay;
+        prioElem.priority = timeOfLoopStart + delay;
         prioElem.func = func;
 
         priorityQueue.enqueue(prioElem);

@@ -31,6 +31,11 @@ class RunLoop
     private var queuedASAPParams : LinkedQueue< Dynamic >;
     private var queuedASAPParamCount : LinkedQueue<Int>;
 
+    private var loopObservers : Array<RunLoop->Void>;
+
+    public var timeOfLoopStart(default, null): Float = 0;
+    public var deltaOfLoop(default, null): Float = 0;
+
     static public function getMainLoop() : MainRunLoop
     {
         if(mainLoop == null)
@@ -55,6 +60,8 @@ class RunLoop
         queuedASAPParams = new LinkedQueue();
         queuedASAPParamCount = new LinkedQueue();
 
+        loopObservers = [];
+
         #if cpp
         queueMutex = new Mutex();
         #end
@@ -75,6 +82,23 @@ class RunLoop
 
     public function loopAll()
     {
+        if (timeOfLoopStart == 0)
+        {
+            timeOfLoopStart = Timer.stamp();
+            deltaOfLoop = 0;
+        }
+        else
+        {
+            var newTime = Timer.stamp();
+            deltaOfLoop = newTime - timeOfLoopStart;
+            timeOfLoopStart = newTime;
+        }
+
+        for(loopObserver in loopObservers)
+        {
+            loopObserver(this);
+        }
+
         while(true)
         {
             var executedSomething = false;
@@ -107,11 +131,28 @@ class RunLoop
 
     public function loopOnce(timeLimit : Float)
     {
+        if (timeOfLoopStart == 0)
+        {
+            timeOfLoopStart = Timer.stamp();
+            deltaOfLoop = 0;
+        }
+        else
+        {
+            var newTime = Timer.stamp();
+            deltaOfLoop = newTime - timeOfLoopStart;
+            timeOfLoopStart = newTime;
+        }
+
+
         var executedCount = 0;
-        var initialTime : Float = Timer.stamp ();
 
         var timeLeft = timeLimit;
 
+        /// run the observers
+        for(loopObserver in loopObservers)
+        {
+            loopObserver(this);
+        }
 
         var asapFunctionCount = queuedASAPFunctions.size();
         var lowPrioFunctionCount = queuedFunctions.size();
@@ -127,7 +168,6 @@ class RunLoop
 
         /// execute 1 low prio function, and as much as possible for the time limit
 
-
         if(lowPrioFunctionCount == 0)
         {
             return;
@@ -137,7 +177,7 @@ class RunLoop
         --lowPrioFunctionCount;
 
         var timeAfterASAPAndOneLowPrio = Timer.stamp();
-        timeLeft -= timeAfterASAPAndOneLowPrio - initialTime;
+        timeLeft -= timeAfterASAPAndOneLowPrio - timeOfLoopStart;
         /// execute remaining low prios for as much as the time limit allows
 
         var timeBeforeOneLowPrio = Timer.stamp();
@@ -270,6 +310,17 @@ class RunLoop
                 func(param1, param2, param3, param4);
 
         }
+    }
+
+    /// run every loop
+    public function addLoopObserver(func: RunLoop->Void): Void 
+    {
+        loopObservers.push(func);
+    }
+
+    public function removeLoopObserver(func: RunLoop->Void): Void
+    {
+        loopObservers.remove(func);  
     }
     
     public function queue(func : Void->Void, priority : Priority) : Void
