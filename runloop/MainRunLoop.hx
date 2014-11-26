@@ -122,4 +122,11 @@ class MainRunLoop extends RunLoop
     {
         taskPool.push(prioElem);
     }
+
+    override private function clear()
+    {
+        super.clear();
+
+        priorityQueue = new PriorityQueue(true, TASK_POOL_INITIAL_SIZE);
+    }
 }

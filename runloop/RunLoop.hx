@@ -52,19 +52,11 @@ class RunLoop
 
     public function new()
     {
-        queuedFunctions = new LinkedQueue();
-        queuedParams = new LinkedQueue();
-        queuedParamCount = new LinkedQueue();
-
-        queuedASAPFunctions = new LinkedQueue();
-        queuedASAPParams = new LinkedQueue();
-        queuedASAPParamCount = new LinkedQueue();
-
-        loopObservers = [];
-
         #if cpp
         queueMutex = new Mutex();
         #end
+
+        clear();
     }
 
     static private function initializeBaseRunLoops()
@@ -444,6 +436,28 @@ class RunLoop
                 queuedParams.enqueue(param3);
                 queuedParams.enqueue(param4);
         }
+
+        #if cpp
+        queueMutex.release();
+        #end
+    }
+
+    private function clear(): Void
+    {
+        #if cpp
+        queueMutex.acquire();
+        #end
+
+
+        queuedFunctions = new LinkedQueue();
+        queuedParams = new LinkedQueue();
+        queuedParamCount = new LinkedQueue();
+
+        queuedASAPFunctions = new LinkedQueue();
+        queuedASAPParams = new LinkedQueue();
+        queuedASAPParamCount = new LinkedQueue();
+
+        loopObservers = [];
 
         #if cpp
         queueMutex.release();
