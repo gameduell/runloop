@@ -54,19 +54,22 @@ class MainRunLoop extends RunLoop
 
     public function loopMainLoop() : Void
     {
+        /// first the delays
+        handleDelays();
+
+        var timeLeft; /// 60 fps, should be a settable variable later
+
         if(!firstLoopHappened)
         {
             firstLoopHappened = true;
+            timeLeft = (1.0 / 60.0); /// 60 fps, should be a settable variable later
         }
         else
         {
-            /// first the delays
-            handleDelays();
-
-            var timeLeft = (1.0 / 60.0) - deltaOfLoop; /// 60 fps, should be a settable variable later
-
-            loopOnce(timeLeft);
+            timeLeft = (1.0 / 60.0) - deltaOfLoop; 
         }
+
+        loopOnce(timeLeft);
     }
 
     private function handleDelays()

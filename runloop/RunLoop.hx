@@ -448,7 +448,6 @@ class RunLoop
         queueMutex.acquire();
         #end
 
-
         queuedFunctions = new LinkedQueue();
         queuedParams = new LinkedQueue();
         queuedParamCount = new LinkedQueue();
