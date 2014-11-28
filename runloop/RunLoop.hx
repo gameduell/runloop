@@ -95,23 +95,16 @@ class RunLoop
         {
             var executedSomething = false;
 
-            var asapFunctionCount = queuedASAPFunctions.size();
-
-            while(asapFunctionCount > 0)
+            while(queuedASAPFunctions.size() > 0)
             {
                 doOneASAPPriorityFunction();
-                --asapFunctionCount;
 
                 executedSomething = true;
             }
 
-            var lowPrioFunctionCount = queuedFunctions.size();
-
-            while(lowPrioFunctionCount > 0)
+            while(queuedFunctions.size() > 0)
             {
                 doOneLowPriorityFunction();
-
-                --lowPrioFunctionCount;
 
                 executedSomething = true;
             }
