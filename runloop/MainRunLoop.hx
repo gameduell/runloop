@@ -81,7 +81,7 @@ class MainRunLoop extends RunLoop
         queueMutex.acquire();
         #end
 
-        while(priorityQueue.size() != 0 && priorityQueue.peek().priority < timeOfLoopStart)
+        while(priorityQueue.size() != 0 && priorityQueue.peek().priority < Timer.stamp())
         {
             var prioElem = priorityQueue.dequeue();
 
