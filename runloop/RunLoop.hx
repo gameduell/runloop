@@ -72,7 +72,27 @@ class RunLoop
 
     }
 
+    /// like loopOnce, but will loop until the loopOnceQueues returns false (it didnt do anything)
     public function loopAll()
+    {
+        loopOnceDetermineTime();
+
+        loopOnceObservers();
+
+        while(loopOnceQueues()) continue;
+    }
+
+    /// runs loopOnceDetermineTime, loopOnceObservers and loopOnceQueues
+    public function loopOnce(?timeLimit: Float)
+    {
+        loopOnceDetermineTime();
+
+        loopOnceObservers();
+
+        loopOnceQueues(timeLimit);
+    }
+
+    public function loopOnceDetermineTime()
     {
         if (timeOfLoopStart == 0)
         {
@@ -84,60 +104,25 @@ class RunLoop
             var newTime = Timer.stamp();
             deltaOfLoop = newTime - timeOfLoopStart;
             timeOfLoopStart = newTime;
-        }
-
-        for(loopObserver in loopObservers)
-        {
-            loopObserver(this);
-        }
-
-        while(true)
-        {
-            var executedSomething = false;
-
-            while(queuedASAPFunctions.size() > 0)
-            {
-                doOneASAPPriorityFunction();
-
-                executedSomething = true;
-            }
-
-            while(queuedFunctions.size() > 0)
-            {
-                doOneLowPriorityFunction();
-
-                executedSomething = true;
-            }
-
-            if(!executedSomething)
-                break;
         }
     }
 
-    public function loopOnce(timeLimit : Float)
+    /// Run automatically on loop once, unless slave mode is set
+    public function loopOnceObservers()
     {
-        if (timeOfLoopStart == 0)
-        {
-            timeOfLoopStart = Timer.stamp();
-            deltaOfLoop = 0;
-        }
-        else
-        {
-            var newTime = Timer.stamp();
-            deltaOfLoop = newTime - timeOfLoopStart;
-            timeOfLoopStart = newTime;
-        }
-
-
-        var executedCount = 0;
-
-        var timeLeft = timeLimit;
-
         /// run the observers
         for(loopObserver in loopObservers)
         {
             loopObserver(this);
         }
+    }
+
+    /// returns true if it did something
+    public function loopOnceQueues(?timeLimit : Float): Bool
+    {
+        var executedCount = 0;
+
+        var timeLeft = timeLimit;
 
         var asapFunctionCount = queuedASAPFunctions.size();
         var lowPrioFunctionCount = queuedFunctions.size();
@@ -155,28 +140,35 @@ class RunLoop
 
         if(lowPrioFunctionCount == 0)
         {
-            return;
+            return executedCount > 0;
         }
 
         doOneLowPriorityFunction();
         --lowPrioFunctionCount;
 
         var timeAfterASAPAndOneLowPrio = Timer.stamp();
-        timeLeft -= timeAfterASAPAndOneLowPrio - timeOfLoopStart;
+
+        if (timeLeft != null)
+            timeLeft -= timeAfterASAPAndOneLowPrio - timeOfLoopStart;
         /// execute remaining low prios for as much as the time limit allows
 
         var timeBeforeOneLowPrio = Timer.stamp();
-        while(timeLeft > 0 && lowPrioFunctionCount > 0)
+        while((timeLeft != null || timeLeft > 0) && lowPrioFunctionCount > 0)
         {
             doOneLowPriorityFunction();
 
             var newTime = Timer.stamp();
-            timeLeft -= newTime - timeBeforeOneLowPrio;
+
+            if (timeLeft != null)
+                timeLeft -= newTime - timeBeforeOneLowPrio;
+
             timeBeforeOneLowPrio = newTime;
 
             --lowPrioFunctionCount;
             executedCount++;
         }
+
+        return executedCount > 0;
     }
 
     /// main run loop instance will be garbage collected after this, if it's not held somewhere

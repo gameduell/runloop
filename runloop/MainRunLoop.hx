@@ -52,27 +52,7 @@ class MainRunLoop extends RunLoop
         priorityQueue = new PriorityQueue(true, TASK_POOL_INITIAL_SIZE);
     }
 
-    public function loopMainLoop() : Void
-    {
-        /// first the delays
-        handleDelays();
-
-        var timeLeft; /// 60 fps, should be a settable variable later
-
-        if(!firstLoopHappened)
-        {
-            firstLoopHappened = true;
-            timeLeft = (1.0 / 60.0); /// 60 fps, should be a settable variable later
-        }
-        else
-        {
-            timeLeft = (1.0 / 60.0) - deltaOfLoop; 
-        }
-
-        loopOnce(timeLeft);
-    }
-
-    private function handleDelays()
+    public function loopOnceDelays() : Void
     {
         if (priorityQueue.size() == 0)
             return;
@@ -93,6 +73,14 @@ class MainRunLoop extends RunLoop
         #if cpp
         queueMutex.release();
         #end
+    }
+
+    /// adds the loopOnceDelays
+    override function loopOnce(?timeLimit: Float) : Void
+    {
+        loopOnceDelays();
+
+        super.loopOnce(timeLimit);
     }
 
     public function delay(func : Void->Void, delay : Float)
