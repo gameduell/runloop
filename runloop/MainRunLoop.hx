@@ -75,6 +75,23 @@ class MainRunLoop extends RunLoop
         #end
     }
 
+    public function loopMainLoop() : Void
+    {
+        var timeLeft; /// 60 fps, should be a settable variable later
+
+        if(!firstLoopHappened)
+        {
+            firstLoopHappened = true;
+            timeLeft = (1.0 / 60.0); /// 60 fps, should be a settable variable later
+        }
+        else
+        {
+            timeLeft = (1.0 / 60.0) - deltaOfLoop; 
+        }
+
+        loopOnce(timeLeft);
+    }
+
     /// adds the loopOnceDelays
     override function loopOnce(?timeLimit: Float) : Void
     {
