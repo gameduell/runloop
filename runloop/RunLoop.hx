@@ -297,7 +297,14 @@ class RunLoop
 
     public function removeLoopObserver(func: RunLoop->Void): Void
     {
-        loopObservers.remove(func);  
+        for (element in loopObservers)
+        {
+            if (Reflect.compareMethods(element, func))
+            {
+                loopObservers.remove(element);
+                break;
+            }
+        }
     }
     
     public function queue(func : Void->Void, priority : Priority) : Void
