@@ -31,7 +31,7 @@ import msignal.Signal.Signal1;
 class Timer
 {
     public var onFire(default, null): Signal1<Float>;
-    public var paused(default, null): Bool = false;
+    public var paused(default, null): Bool = true;
 
     public var timeScale: Float = 1.0;
 
@@ -134,12 +134,16 @@ class Timer
 
     public function stop(): Void
     {
+        if (paused) return;
+
         paused = true;
         RunLoop.getMainLoop().removeLoopObserver(tick);
     }
 
     public function start(): Void
     {
+        if (!paused) return;
+
         paused = false;
 
         tickCount = 0;
