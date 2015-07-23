@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<library>
+<library xmlns="duell">
 
     <duelllib name="polygonal-ds" version="2.0.0+" />
 
     <include path="backends/runloop_cpp/duell_library.xml" if="cpp" />
     <include path="backends/runloop_notcpp/duell_library.xml" if="flash || html5" />
+
+    <platform-config>
+        <documentation>
+            <documentation-folder library="runloop" path="documentation" />
+        </documentation>
+    </platform-config>
 
 </library>
