@@ -27,6 +27,7 @@
 package runloop;
 
 import de.polygonal.ds.LinkedQueue;
+import de.polygonal.ds.DLL;
 import haxe.Timer;
 
 #if cpp
@@ -50,7 +51,7 @@ class RunLoop
     private var queuedASAPParams : LinkedQueue< Dynamic >;
     private var queuedASAPParamCount : LinkedQueue<Int>;
 
-    private var loopObservers : Array<RunLoop->Void>;
+    private var loopObservers : DLL<RunLoop->Void>;
 
     public var timeOfLoopStart(default, null): Float = 0;
     public var deltaOfLoop(default, null): Float = 0;
@@ -130,9 +131,12 @@ class RunLoop
     public function loopOnceObservers()
     {
         /// run the observers
-        for(loopObserver in loopObservers)
+        var node = loopObservers.head;
+
+        while (node != null)
         {
-            loopObserver(this);
+            node.val(this);
+            node = node.next;
         }
     }
 
@@ -311,7 +315,7 @@ class RunLoop
     /// run every loop
     public function addLoopObserver(func: RunLoop->Void): Void
     {
-        loopObservers.push(func);
+        loopObservers.append(func);
     }
 
     public function removeLoopObserver(func: RunLoop->Void): Void
@@ -467,7 +471,7 @@ class RunLoop
         queuedASAPParams = new LinkedQueue();
         queuedASAPParamCount = new LinkedQueue();
 
-        loopObservers = [];
+        loopObservers = new DLL(32);
 
         #if cpp
         queueMutex.release();
