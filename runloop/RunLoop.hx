@@ -132,10 +132,16 @@ class RunLoop
     {
         /// run the observers
         var node = loopObservers.head;
+        var element: RunLoop -> Void = null;
 
         while (node != null)
         {
-            node.val(this);
+            element = node.val;
+
+            if (element != null)
+            {
+                element(this);
+            }
             node = node.next;
         }
     }
