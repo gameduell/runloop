@@ -99,11 +99,11 @@ class RunLoop
 
         loopOnceObservers();
 
-        while(loopOnceQueues()) continue;
+        while(loopOnceQueues(0.0, false)) continue;
     }
 
     /// runs loopOnceDetermineTime, loopOnceObservers and loopOnceQueues
-    public function loopOnce(?timeLimit: Float)
+    public function loopOnce(timeLimit: Float)
     {
         loopOnceDetermineTime();
 
@@ -147,7 +147,7 @@ class RunLoop
     }
 
     /// returns true if it did something
-    public function loopOnceQueues(?timeLimit : Float): Bool
+    public function loopOnceQueues(timeLimit : Float, limit: Bool = true): Bool
     {
         var executedCount = 0;
 
@@ -177,18 +177,18 @@ class RunLoop
 
         var timeAfterASAPAndOneLowPrio = Timer.stamp();
 
-        if (timeLeft != null)
+        if (limit)
             timeLeft -= timeAfterASAPAndOneLowPrio - timeOfLoopStart;
         /// execute remaining low prios for as much as the time limit allows
 
         var timeBeforeOneLowPrio = Timer.stamp();
-        while((timeLeft != null || timeLeft > 0) && lowPrioFunctionCount > 0)
+        while((limit || timeLeft > 0) && lowPrioFunctionCount > 0)
         {
             doOneLowPriorityFunction();
 
             var newTime = Timer.stamp();
 
-            if (timeLeft != null)
+            if (limit)
                 timeLeft -= newTime - timeBeforeOneLowPrio;
 
             timeBeforeOneLowPrio = newTime;
