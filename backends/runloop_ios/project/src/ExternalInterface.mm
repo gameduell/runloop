@@ -34,11 +34,12 @@ using std::map;
 #import "DUELLAppDelegate.h"
 
 value *__onExecutorCallback = NULL;
-static std::map<int, DuellCallbackBlock> __callbackMap;
+NSMutableDictionary* __callbackDict = nil;
 static unsigned int __nextId = 0;
 
 static value runloopios_initialize(value callback)
 {
+	__callbackDict = [NSMutableDictionary dictionaryWithDictionary:@{}];
 	val_check_function(callback, 1); // Is Func ?
 	if (__onExecutorCallback == NULL)
 	{
@@ -48,7 +49,7 @@ static value runloopios_initialize(value callback)
 	[DUELLAppDelegate overrideExecutor: ^(DuellCallbackBlock block)
 	{
 		int id = __nextId++;
-		__callbackMap[id] = block;
+		[__callbackDict setObject: [block copy] forKey:[NSNumber numberWithInt:id]];
 		value intValue = alloc_int(id);
 		val_call1(*__onExecutorCallback, intValue);
 	}];
@@ -61,9 +62,9 @@ DEFINE_PRIM (runloopios_initialize, 1);
 
 static value runloopios_invoke(value id)
 {
-	DuellCallbackBlock block = __callbackMap[val_int(id)];
-	__callbackMap.erase(val_int(id));
+	DuellCallbackBlock block = __callbackDict[[NSNumber numberWithInt:val_int(id)]];
 	block();
+	[__callbackDict removeObjectForKey:[NSNumber numberWithInt:val_int(id)]];
 
 	return alloc_null();
 }
