@@ -29,51 +29,45 @@
 #endif
 
 #include <hx/CFFI.h>
-
+#include <map>
+using std::map;
 #import "DUELLAppDelegate.h"
 
-/*
-#import "input_ios/InputCapturer.h"
+value *__onExecutorCallback = NULL;
+static std::map<int, DuellCallbackBlock> __callbackMap;
+static unsigned int __nextId = 0;
 
-value *__onTouchesCallback = NULL;
-value *__setCachedVariables = NULL;
-
-static value inputios_initialize(value onTouchesCallback, value setCachedVariables)
+static value runloopios_initialize(value callback)
 {
-	val_check_function(onTouchesCallback, 2); // Is Func ?
-
-	if (__onTouchesCallback == NULL)
+	val_check_function(callback, 1); // Is Func ?
+	if (__onExecutorCallback == NULL)
 	{
-		__onTouchesCallback = alloc_root();
+		__onExecutorCallback = alloc_root();
 	}
-	*__onTouchesCallback = onTouchesCallback;
 
-	val_check_function(setCachedVariables, 2); // Is Func ?
-
-	if (__setCachedVariables == NULL)
+	[DUELLAppDelegate overrideExecutor: ^(DuellCallbackBlock block)
 	{
-		__setCachedVariables = alloc_root();
-	}
-	*__setCachedVariables = setCachedVariables;
+		int id = __nextId++;
+		__callbackMap[id] = block;
+		value intValue = alloc_int(id);
+		val_call1(*__onExecutorCallback, intValue);
+	}];
 
-	[InputCapturer initializeCapturer];
+
+	*__onExecutorCallback = callback;
+	return alloc_null();
+}
+DEFINE_PRIM (runloopios_initialize, 1);
+
+static value runloopios_invoke(value id)
+{
+	DuellCallbackBlock block = __callbackMap[val_int(id)];
+	__callbackMap.erase(val_int(id));
+	block();
 
 	return alloc_null();
 }
-DEFINE_PRIM (inputios_initialize, 2);
-
-void callHaxeOnTouchesCallback(value touchCount, value touchList)
-{
-	val_call2(*__onTouchesCallback, touchCount, touchList);
-}
-
-void callSetCachedVariablesCallback(value touchCount, value touchList)
-{
-	val_call2(*__setCachedVariables, touchCount, touchList);
-}
-
-extern "C" int inputios_register_prims () { return 0; }
-*/
+DEFINE_PRIM (runloopios_invoke, 1);
 
 static value dummy()
 {
