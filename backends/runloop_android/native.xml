@@ -1,0 +1,4 @@
+<xml>
+		<compilerflag value="-I${haxelib:duell_runloop}/backends/runloop_android/project/include" />
+</xml>
+
