@@ -48,10 +48,14 @@ static value runloopios_initialize(value callback)
 
 	[DUELLAppDelegate overrideExecutor: ^(DuellCallbackBlock block)
 	{
-		int id = __nextId++;
-		[__callbackDict setObject: [block copy] forKey:[NSNumber numberWithInt:id]];
-		value intValue = alloc_int(id);
-		val_call1(*__onExecutorCallback, intValue);
+		@synchronized(__callbackDict)
+		{
+			int id = __nextId++;
+			[__callbackDict setObject: [block copy] forKey:[NSNumber numberWithInt:id]];
+			value intValue = alloc_int(id);
+			val_call1(*__onExecutorCallback, intValue);
+		}
+
 	}];
 
 
@@ -62,9 +66,12 @@ DEFINE_PRIM (runloopios_initialize, 1);
 
 static value runloopios_invoke(value id)
 {
-	DuellCallbackBlock block = __callbackDict[[NSNumber numberWithInt:val_int(id)]];
-	block();
-	[__callbackDict removeObjectForKey:[NSNumber numberWithInt:val_int(id)]];
+	@synchronized(__callbackDict)
+	{
+		DuellCallbackBlock block = __callbackDict[[NSNumber numberWithInt:val_int(id)]];
+    	block();
+    	[__callbackDict removeObjectForKey:[NSNumber numberWithInt:val_int(id)]];
+	}
 
 	return alloc_null();
 }

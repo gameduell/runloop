@@ -47,7 +47,7 @@ public class RunloopDispatch
 
     public static native void onCallback(int id);
 
-    public static void initialize()
+    public synchronized static void initialize()
     {
         final DuellActivity activity = DuellActivity.getInstance();
         MainHaxeThreadHandler runloopHaxeThreadHandler = new MainHaxeThreadHandler()
@@ -63,7 +63,7 @@ public class RunloopDispatch
         activity.setHaxeRunloopHandler(runloopHaxeThreadHandler);
     }
 
-    public static void invoke(int id)
+    public synchronized static void invoke(int id)
     {
         Runnable callback = map.get(id);
         map.remove(id);
