@@ -6,6 +6,7 @@
     <include path="backends/runloop_cpp/duell_library.xml" if="cpp" />
     <include path="backends/runloop_notcpp/duell_library.xml" if="flash || html5" />
     <include path="backends/runloop_ios/duell_library.xml" if="ios" />
+    <include path="backends/runloop_android/duell_library.xml" if="android" />
 
     <platform-config>
         <documentation>

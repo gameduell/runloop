@@ -32,6 +32,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import org.haxe.duell.DuellActivity;
+import org.haxe.duell.MainHaxeThreadHandler;
 import android.view.WindowManager;
 
 import java.lang.ref.WeakReference;
@@ -41,7 +42,7 @@ import java.util.Hashtable;
 
 public class RunloopDispatch
 {
-    private  static  Hashtable<Int, String> map = new Hashtable<Int, Runnable>();
+    private  static  Hashtable<Integer, Runnable> map = new Hashtable<Integer, Runnable>();
     private static int nextId = 0;
 
     public static native void onCallback(int id);
@@ -59,7 +60,7 @@ public class RunloopDispatch
                 onCallback(id);
             }
         };
-        activity.setHaxeRunloopHandler();
+        activity.setHaxeRunloopHandler(runloopHaxeThreadHandler);
     }
 
     public static void invoke(int id)

@@ -40,7 +40,7 @@
 static value *__onExecutorCallback = NULL;
 
 
-static value runloopandroid_initialize(value callback))
+static value runloopandroid_initialize(value callback)
 {
 	val_check_function(callback, 1); // Is Func ?
 	if (__onExecutorCallback == NULL)
@@ -78,10 +78,10 @@ struct AutoHaxe
 	}
 };
 
-JAVA_EXPORT void JNICALL Java_org_haxe_duell_runloop_RunloopDispatch_onCallback(JNIEnv * env, jobject obj, jint count);
+JAVA_EXPORT void JNICALL Java_org_haxe_duell_runloop_RunloopDispatch_onCallback(JNIEnv * env, jobject obj, jint count)
 {
 	AutoHaxe haxe("RunloopDispatch_onCallback");
-	val_call1(*__onExecutorCallback, count);
+	val_call1(*__onExecutorCallback, alloc_int(count));
 }
 
 
