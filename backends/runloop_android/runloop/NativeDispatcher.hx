@@ -31,7 +31,7 @@ import hxjni.JNI;
 
 class NativeDispatcher
 {
-    static private var runloopandroid_initialize = Lib.load ("runloopandroid", "runloopios_initialize", 1);
+    static private var runloopandroid_initialize = Lib.load ("runloopandroid", "runloopandroid_initialize", 1);
 
     static private var java_initialize = JNI.createStaticMethod("org/haxe/duell/runloop/RunloopDispatch", "initialize", "()V");
     static private var java_invoke = JNI.createStaticMethod("org/haxe/duell/runloop/RunloopDispatch", "invoke", "(I)V");
