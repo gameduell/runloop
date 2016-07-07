@@ -53,6 +53,7 @@ class NativeDispatcher
             RunLoop.getMainLoop().queue(onQueue, Priority.PriorityASAP);
         }
 
+        java_initialize();
         runloopandroid_initialize(executor);
     }
 }
