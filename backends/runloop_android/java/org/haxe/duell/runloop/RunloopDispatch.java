@@ -39,10 +39,12 @@ import java.lang.ref.WeakReference;
 
 import android.util.Log;
 import java.util.Hashtable;
+import java.util.Vector;
 
 public class RunloopDispatch
 {
     private  static  Hashtable<Integer, Runnable> map = new Hashtable<Integer, Runnable>();
+    private  static Vector<Integer> newIds = new Vector<Integer>();
     private static int nextId = 0;
 
     public static native void onCallback(int id);
@@ -57,14 +59,26 @@ public class RunloopDispatch
             {
                 int id = nextId++;
                 map.put(id, runObj);
-                onCallback(id);
+                newIds.add(id);
+                //onCallback(id);
             }
         };
         activity.setHaxeRunloopHandler(runloopHaxeThreadHandler);
     }
 
+    public synchronized  static  void scheduleCallbacks()
+    {
+        for (Integer id : newIds)
+        {
+            onCallback(id);
+        }
+
+        newIds.clear();
+    }
+
     public synchronized static void invoke(int id)
     {
+        //Log.w("trace", "invoke " + id);
         Runnable callback = map.get(id);
         map.remove(id);
         callback.run();

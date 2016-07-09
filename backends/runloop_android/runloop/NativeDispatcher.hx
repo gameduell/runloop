@@ -34,6 +34,7 @@ class NativeDispatcher
     static private var runloopandroid_initialize = Lib.load ("runloopandroid", "runloopandroid_initialize", 1);
 
     static private var java_initialize = JNI.createStaticMethod("org/haxe/duell/runloop/RunloopDispatch", "initialize", "()V");
+    static private var java_schedule = JNI.createStaticMethod("org/haxe/duell/runloop/RunloopDispatch", "scheduleCallbacks", "()V");
     static private var java_invoke = JNI.createStaticMethod("org/haxe/duell/runloop/RunloopDispatch", "invoke", "(I)V");
 
     public function new(): Void
@@ -55,5 +56,13 @@ class NativeDispatcher
 
         java_initialize();
         runloopandroid_initialize(executor);
+
+        RunLoop.getMainLoop().queue(schedule, Priority.PriorityASAP);
+    }
+
+    private function schedule()
+    {
+        java_schedule();
+        RunLoop.getMainLoop().queue(schedule, Priority.PriorityASAP);
     }
 }
