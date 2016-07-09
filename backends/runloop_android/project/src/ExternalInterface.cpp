@@ -30,6 +30,7 @@
 
 #include <hx/CFFI.h>
 #include <jni.h>
+#include <pthread.h>
 
 #ifdef __GNUC__
 	#define JAVA_EXPORT __attribute__ ((visibility("default"))) JNIEXPORT
@@ -42,6 +43,7 @@ static value *__onExecutorCallback = NULL;
 
 static value runloopandroid_initialize(value callback)
 {
+	//__android_log_print(ANDROID_LOG_ERROR, "trace","runloopandroid_initialize");
 	val_check_function(callback, 1); // Is Func ?
 	if (__onExecutorCallback == NULL)
 	{
@@ -59,28 +61,9 @@ extern "C" {
 	JAVA_EXPORT void JNICALL Java_org_haxe_duell_runloop_RunloopDispatch_onCallback(JNIEnv * env, jobject obj, jint id);
 };
 
-
-struct AutoHaxe
-{
-	int base;
-	const char *message;
-	AutoHaxe(const char *inMessage)
-	{
-		base = 0;
-		message = inMessage;
-		gc_set_top_of_stack(&base,true);
-		//__android_log_print(ANDROID_LOG_VERBOSE, "OpenGL", "Enter %s %p", message, pthread_self());
-	}
-	~AutoHaxe()
-	{
-		//__android_log_print(ANDROID_LOG_VERBOSE, "OpenGL", "Leave %s %p", message, pthread_self());
-		gc_set_top_of_stack(0,true);
-	}
-};
-
 JAVA_EXPORT void JNICALL Java_org_haxe_duell_runloop_RunloopDispatch_onCallback(JNIEnv * env, jobject obj, jint count)
 {
-	AutoHaxe haxe("RunloopDispatch_onCallback");
+	//__android_log_print(ANDROID_LOG_WARN, "trace", "Java_org_haxe_duell_runloop_RunloopDispatch_onCallback");
 	val_call1(*__onExecutorCallback, alloc_int(count));
 }
 
