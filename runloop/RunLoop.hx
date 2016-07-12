@@ -38,6 +38,7 @@ class RunLoop
 {
     static private var mainLoop : MainRunLoop;
     static private var pooledRunLoop : RunLoop;
+    static private var nativeDispatcher: NativeDispatcher;
 
     #if cpp
     private var queueMutex : Mutex;
@@ -90,6 +91,8 @@ class RunLoop
 
         pooledRunLoop = new PooledRunLoop();
 
+        nativeDispatcher = new NativeDispatcher();
+        nativeDispatcher.initialize();
     }
 
     /// like loopOnce, but will loop until the loopOnceQueues returns false (it didnt do anything)
