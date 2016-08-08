@@ -1,3 +1,7 @@
 tests/Export
 *.iml
 .idea/
+backends/runloop_android/ndll
+backends/runloop_android/project/obj
+backends/runloop_ios/ndll
+backends/runloop_ios/project/obj
