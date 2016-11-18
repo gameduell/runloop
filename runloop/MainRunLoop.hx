@@ -23,7 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 package runloop;
 
 import haxe.Timer;
@@ -95,7 +95,7 @@ class MainRunLoop extends RunLoop
         #end
     }
 
-    public function loopMainLoop() : Void
+    public function loopMainLoop(loopUntilEmpty: Bool = false) : Void
     {
         var timeLeft: Float = 0.0; /// 60 fps, should be a settable variable later
 
@@ -109,15 +109,15 @@ class MainRunLoop extends RunLoop
             timeLeft = (1.0 / 60.0) - deltaOfLoop;
         }
 
-        loopOnce(timeLeft);
+        loopOnce(timeLeft, loopUntilEmpty);
     }
 
     /// adds the loopOnceDelays
-    override function loopOnce(timeLimit: Float) : Void
+    override function loopOnce(timeLimit: Float, loopUntilEmpty: Bool = false) : Void
     {
         loopOnceDelays();
 
-        super.loopOnce(timeLimit);
+        super.loopOnce(timeLimit, loopUntilEmpty);
     }
 
     public function delay(func : Void->Void, delay : Float)
