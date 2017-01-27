@@ -149,6 +149,7 @@ class MainRunLoop extends RunLoop
     private function recyclePriorityElement(prioElem : DelayPriorityQueueElement)
     {
         taskPool.push(prioElem);
+        prioElem.func = null;
     }
 
     override private function clear()
