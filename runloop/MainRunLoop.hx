@@ -49,6 +49,10 @@ class DelayPriorityQueueElement implements Prioritizable
 
 class MainRunLoop extends RunLoop
 {
+		// Sets the amount of time allocated per frame for running queued tasks.
+		// Set this to e.g. 1.0 second while loading to spend less time rendering.
+	public var loopDeltaForTasks (default, default): Float;
+
     private var firstLoopHappened : Bool;
 
     private var taskPool : Array<DelayPriorityQueueElement>;
@@ -59,6 +63,8 @@ class MainRunLoop extends RunLoop
     private function new() : Void
     {
         super();
+
+		loopDeltaForTasks = 1.0 / 60.0;	// 60 FPS by default
 
         firstLoopHappened = false;
 
@@ -97,16 +103,16 @@ class MainRunLoop extends RunLoop
 
     public function loopMainLoop(loopUntilEmpty: Bool = false) : Void
     {
-        var timeLeft: Float = 0.0; /// 60 fps, should be a settable variable later
+        var timeLeft: Float = 0.0;
 
         if(!firstLoopHappened)
         {
             firstLoopHappened = true;
-            timeLeft = (1.0 / 60.0); /// 60 fps, should be a settable variable later
+            timeLeft = loopDeltaForTasks;
         }
         else
         {
-            timeLeft = (1.0 / 60.0) - deltaOfLoop;
+            timeLeft = Math.max(loopDeltaForTasks - deltaOfLoop, 0.0);
         }
 
         loopOnce(timeLeft, loopUntilEmpty);
