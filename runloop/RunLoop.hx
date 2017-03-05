@@ -103,13 +103,20 @@ class RunLoop
     }
 
     /// runs loopOnceDetermineTime, loopOnceObservers and loopOnceQueues
-    public function loopOnce(timeLimit: Float)
+    public function loopOnce(timeLimit: Float, loopUntilEmpty: Bool = false)
     {
         loopOnceDetermineTime();
 
         loopOnceObservers();
 
-        loopOnceQueues(timeLimit);
+        if (loopUntilEmpty)
+        {
+            loopQueuesUntilEmpty(timeLimit, true);
+        }
+        else
+        {
+            loopOnceQueues(timeLimit, true);
+        }
     }
 
     public function loopOnceDetermineTime()
@@ -146,8 +153,61 @@ class RunLoop
         }
     }
 
+    public function loopQueuesUntilEmpty(timeLimit: Float, limit: Bool = true): Bool
+    {
+        var executedCount = 0;
+
+        var timeLeft = timeLimit;
+
+        var timeBeforeASAP = Timer.stamp();
+
+        /// execute all asap functions
+
+        while(queuedASAPFunctions.size() > 0)
+        {
+            doOneASAPPriorityFunction();
+            ++executedCount;
+        }
+
+        /// execute 1 low prio function, and as much as possible for the time limit
+
+        if(queuedFunctions.size() == 0)
+        {
+            return executedCount > 0;
+        }
+
+        doOneLowPriorityFunction();
+
+        if (limit)
+            timeLeft -= Timer.stamp() - timeBeforeASAP;
+        /// execute remaining low prios for as much as the time limit allows
+
+        var timeBeforeOneLowPrio = Timer.stamp();
+        while((!limit || timeLeft > 0) && queuedFunctions.size() > 0)
+        {
+            doOneLowPriorityFunction();
+            ++executedCount;
+
+            while(queuedASAPFunctions.size() > 0)
+            {
+                doOneASAPPriorityFunction();
+                ++executedCount;
+            }
+
+            var newTime = Timer.stamp();
+
+            if (limit)
+                timeLeft -= newTime - timeBeforeOneLowPrio;
+
+            timeBeforeOneLowPrio = newTime;
+        }
+
+
+        return executedCount > 0;
+    }
+
     /// returns true if it did something
-    public function loopOnceQueues(timeLimit : Float, limit: Bool = true): Bool
+    public function loopOnceQueues(timeLimit: Float, limit: Bool = true): Bool
     {
         var executedCount = 0;
 
@@ -182,7 +242,7 @@ class RunLoop
         /// execute remaining low prios for as much as the time limit allows
 
         var timeBeforeOneLowPrio = Timer.stamp();
-        while((limit || timeLeft > 0) && lowPrioFunctionCount > 0)
+        while((!limit || timeLeft > 0) && lowPrioFunctionCount > 0)
         {
             doOneLowPriorityFunction();
 
